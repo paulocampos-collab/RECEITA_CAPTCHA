@@ -1,12 +1,15 @@
-# pip3 install anticaptchaofficial requests beautifulsoup4
+# pip3 install anticaptchaofficial requests beautifulsoup4 python-dotenv
 
 import requests, time, threading, csv, os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from anticaptchaofficial.hcaptchaproxyless import hCaptchaProxyless
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
-ANTICAPTCHA_API_KEY = "97c0e2a3b8af934729c1123ce73f5f48"
-HCAPTCHA_SITE_KEY   = "53be2ee7-5efc-494e-a3ba-c9258649c070"
+load_dotenv()
+
+ANTICAPTCHA_API_KEY = os.environ["ANTICAPTCHA_API_KEY"]
+HCAPTCHA_SITE_KEY   = os.environ["HCAPTCHA_SITE_KEY"]
 URL_FORM            = "https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp"
 URL_POST            = "https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/ConsultaPublicaExibir.asp"
 TOKEN_TTL_SEGUNDOS  = 90   # hCaptcha expira mais rápido que reCaptcha
