@@ -1,10 +1,14 @@
 # pip3 install anticaptchaofficial requests beautifulsoup4 python-dotenv
 
-import requests, time, threading, csv, os
+import sys, os, requests, time, threading, csv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from anticaptchaofficial.hcaptchaproxyless import hCaptchaProxyless
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
+if sys.stdout.encoding and sys.stdout.encoding.lower().startswith("cp"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 load_dotenv()
 
@@ -67,9 +71,6 @@ class CaptchaToken:
         print("\n  🔑 Resolvendo hCaptcha...")
         t0 = time.time()
 
-        # ① Sessão primeiro — enquanto o captcha resolve, a sessão já está pronta
-        nova_sess = nova_sessao()
-
         solver = hCaptchaProxyless()
         solver.set_verbose(0)
         solver.set_key(ANTICAPTCHA_API_KEY)
@@ -79,7 +80,8 @@ class CaptchaToken:
         if token == 0:
             raise RuntimeError(f"hCaptcha falhou: {solver.error_code}")
 
-        # ② Token atribuído imediatamente após resolução
+        nova_sess = nova_sessao()
+
         self._token   = token
         self._ts      = time.time()
         self._session = nova_sess
@@ -97,10 +99,11 @@ def consultar_cpf(cpf: str, nascimento: str, tentativas: int = 3) -> dict | None
     for t in range(tentativas):
         token, session = captcha.get()
         payload = {
-            "idCheckedReCaptcha": "false",
+            "idCheckedReCaptcha": "true",
             "txtCPF":             cpf_fmt,
             "txtDataNascimento":  nascimento,
             "h-captcha-response": token,
+            "g-recaptcha-response": token,
             "Enviar":             "Consultar",
         }
         try:
